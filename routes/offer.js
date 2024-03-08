@@ -41,7 +41,7 @@ router.post(
       if (req.files) {
         const convertedFile = toBase64(req.files.picture) || null;
         newUpload = await cloudinary.uploader.upload(convertedFile, {
-          // folder: `vinted/offers/${req.user._id}`,
+          folder: `vinted/offers/${req.user._id}`,
           folder: `vinted/offers/${req.body.title}`,
         });
       }
@@ -89,8 +89,8 @@ router.put(
     try {
       if (req.body.newName) {
         const renameUpload = await cloudinary.uploader.rename(
-          req.user._id,
-          req.body.newName
+          `vinted/offers/${req.user._id}`,
+          `vinted/offers/${req.body.newName}`
         );
         res.json({ message: "Upload name successfully updated!" });
       } else {
