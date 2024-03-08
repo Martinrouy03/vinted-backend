@@ -1,12 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI);
 
 // // Import routes
 const signupRoutes = require("./routes/signup");
@@ -19,6 +20,6 @@ app.use(offerRoutes);
 app.all("*", (req, res) => {
   res.status(404).json({ message: "ERROR 404: Not Found." });
 });
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server has started! 🚀");
 });

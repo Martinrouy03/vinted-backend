@@ -5,11 +5,12 @@ const User = require("../models/User");
 const fileUpload = require("express-fileupload");
 const { isValidObjectId } = require("mongoose");
 const cloudinary = require("cloudinary").v2;
+require("dotenv").config;
 
 cloudinary.config({
-  CLOUD_NAME: "dely6vwul",
-  API_KEY: "126619167113696",
-  API_SECRET: "yfYc9VWO5sKChrh_ZFiZmlzi-os",
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
 });
 
 const toBase64 = (file) => {
