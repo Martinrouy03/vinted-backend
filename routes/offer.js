@@ -41,8 +41,7 @@ router.post(
       if (req.files) {
         const convertedFile = toBase64(req.files.picture) || null;
         newUpload = await cloudinary.uploader.upload(convertedFile, {
-          folder: `vinted/offers/${req.user._id}`,
-          folder: `vinted/offers/${req.body.title}`,
+          folder: `vinted/${req.user._id}/${req.body.title}`,
         });
       }
 
