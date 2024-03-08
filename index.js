@@ -17,6 +17,11 @@ app.use(loginRoutes);
 const offerRoutes = require("./routes/offer");
 app.use(offerRoutes);
 
+app.get("/", (req, res) => {
+  console.log("Welcome online!");
+  res.json({ message: "Welcome online!" });
+});
+
 app.all("*", (req, res) => {
   res.status(404).json({ message: "ERROR 404: Not Found." });
 });
