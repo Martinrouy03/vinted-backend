@@ -3,7 +3,6 @@ const router = express.Router();
 const Offer = require("../models/Offer");
 const User = require("../models/User");
 const fileUpload = require("express-fileupload");
-const { isValidObjectId } = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 require("dotenv").config;
 
@@ -98,9 +97,6 @@ router.get("/offers", isAuthenticated, async (req, res) => {
     } else if (priceMax && priceMin) {
       filters.product_price = { $gte: priceMin, $lte: priceMax };
     }
-    // if (priceMin || priceMin) {
-    //   filters.product_price = { $lte: priceMax || 1e10, $gte: priceMin || 0 };
-    // }
     if (sort) {
       sorting.product_price = sort.replace("price-", "");
     }
