@@ -41,7 +41,8 @@ router.post(
       if (req.files) {
         const convertedFile = toBase64(req.files.picture) || null;
         newUpload = await cloudinary.uploader.upload(convertedFile, {
-          folder: `vinted/offers/${req.user._id}`,
+          // folder: `vinted/offers/${req.user._id}`,
+          folder: `vinted/offers/${req.body.title}`,
         });
       }
 
@@ -74,6 +75,27 @@ router.post(
       await newOffer.save();
       await newOffer.populate("owner", "account");
       res.status(200).json(newOffer);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+router.put(
+  "/offers/publish",
+  isAuthenticated,
+  fileUpload(),
+  async (req, res) => {
+    try {
+      if (req.body.newName) {
+        const renameUpload = await cloudinary.uploader.rename(
+          req.user._id,
+          req.body.newName
+        );
+        res.json({ message: "Upload name successfully updated!" });
+      } else {
+        res.status(400).json({ message: "Missing argument!" });
+      }
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

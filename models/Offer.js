@@ -6,6 +6,7 @@ const Offer = mg.model("Offer", {
   product_price: Number,
   product_details: Array,
   product_image: Object,
+  product_pictures: Array,
   owner: {
     type: mg.Schema.Types.ObjectId,
     ref: "User",
