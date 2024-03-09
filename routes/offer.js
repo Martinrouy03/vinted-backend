@@ -37,14 +37,18 @@ router.post(
   fileUpload(),
   async (req, res) => {
     try {
-      let newUpload = null;
-      if (req.files) {
-        const convertedFile = toBase64(req.files.picture) || null;
-        newUpload = await cloudinary.uploader.upload(convertedFile, {
-          folder: `vinted/${req.user._id}/${req.body.title}`,
+      let pictures = [];
+      if (req.files.pictures.length === 0) {
+        return res.json("No file to upload!");
+      } else {
+        const files2upoad = req.files.pictures;
+        const arrayOfPromises = files2upoad.map((picture) => {
+          return cloudinary.uploader.upload(toBase64(picture), {
+            folder: `vinted/${req.user._id}/${req.body.title}`,
+          });
         });
+        const result = await Promise.all(arrayOfPromises);
       }
-
       const { title, description, price, condition, city, brand, size, color } =
         req.body;
       const newOffer = new Offer({
@@ -68,7 +72,8 @@ router.post(
             EMPLACEMENT: city,
           },
         ],
-        product_image: newUpload,
+        // product_image: newUpload,
+        product_pictures: pictures,
         owner: req.user._id,
       });
       await newOffer.save();
@@ -80,26 +85,26 @@ router.post(
   }
 );
 
-router.put(
-  "/offers/publish",
-  isAuthenticated,
-  fileUpload(),
-  async (req, res) => {
-    try {
-      if (req.body.newName) {
-        const renameUpload = await cloudinary.uploader.rename(
-          `vinted/offers/${req.user._id}`,
-          `vinted/offers/${req.body.newName}`
-        );
-        res.json({ message: "Upload name successfully updated!" });
-      } else {
-        res.status(400).json({ message: "Missing argument!" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
-);
+// router.put(
+//   "/offers/publish",
+//   isAuthenticated,
+//   fileUpload(),
+//   async (req, res) => {
+//     try {
+//       if (req.body.newName) {
+//         const renameUpload = await cloudinary.uploader.rename(
+//           `vinted/${req.user._id}`,
+//           `vinted/${req.body.newName}`
+//         );
+//         res.json({ message: "Upload name successfully updated!" });
+//       } else {
+//         res.status(400).json({ message: "Missing argument!" });
+//       }
+//     } catch (error) {
+//       res.status(500).json({ message: error.message });
+//     }
+//   }
+// );
 
 router.get("/offers", isAuthenticated, async (req, res) => {
   try {
