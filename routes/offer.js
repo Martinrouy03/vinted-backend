@@ -4,6 +4,7 @@ const Offer = require("../models/Offer");
 const User = require("../models/User");
 const fileUpload = require("express-fileupload");
 const cloudinary = require("cloudinary").v2;
+const toBase64 = require("../utils/toBase64");
 require("dotenv").config;
 
 cloudinary.config({
@@ -11,10 +12,6 @@ cloudinary.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
-
-const toBase64 = (file) => {
-  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
-};
 
 const isAuthenticated = async (req, res, next) => {
   if (req.headers.authorization) {
@@ -37,48 +34,55 @@ router.post(
   fileUpload(),
   async (req, res) => {
     try {
-      let pictures = [];
       if (req.files.pictures.length === 0) {
         return res.json("No file to upload!");
       } else {
+        const {
+          title,
+          description,
+          price,
+          condition,
+          city,
+          brand,
+          size,
+          color,
+        } = req.body;
+        const newOffer = new Offer({
+          product_name: title,
+          product_description: description,
+          product_price: price,
+          product_details: [
+            {
+              MARQUE: brand,
+            },
+            {
+              TAILLE: size,
+            },
+            {
+              ÉTAT: condition,
+            },
+            {
+              COULEUR: color,
+            },
+            {
+              EMPLACEMENT: city,
+            },
+          ],
+          owner: req.user._id,
+        });
         const files2upoad = req.files.pictures;
         const arrayOfPromises = files2upoad.map((picture) => {
+          console.log(picture);
           return cloudinary.uploader.upload(toBase64(picture), {
-            folder: `vinted/${req.user._id}/${req.body.title}`,
+            public_id: `vinted/offers/${newOffer._id}/${picture.name}`,
           });
         });
         const result = await Promise.all(arrayOfPromises);
+        newOffer.product_pictures = result;
+        await newOffer.save();
+        await newOffer.populate("owner", "account");
+        res.status(200).json(newOffer);
       }
-      const { title, description, price, condition, city, brand, size, color } =
-        req.body;
-      const newOffer = new Offer({
-        product_name: title,
-        product_description: description,
-        product_price: price,
-        product_details: [
-          {
-            MARQUE: brand,
-          },
-          {
-            TAILLE: size,
-          },
-          {
-            ÉTAT: condition,
-          },
-          {
-            COULEUR: color,
-          },
-          {
-            EMPLACEMENT: city,
-          },
-        ],
-        // product_image: newUpload,
-        product_pictures: pictures,
-        owner: req.user._id,
-      });
-      await newOffer.save();
-      await newOffer.populate("owner", "account");
-      res.status(200).json(newOffer);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
